@@ -27,3 +27,10 @@ def test_formatar_preco():
     from src.calculator import formatar_preco
     assert formatar_preco(500.0) == "R$ 500,00"
     assert formatar_preco(0.0) == "R$ 0,00"
+
+
+def test_calcular_frete_com_nomeado():
+    """Testa cálculo usando parâmetros nomeados (refatoração)."""
+    from src.calculator import calcular_frete
+    resultado = calcular_frete(peso_kg=5.0, distancia_km=200.0)
+    assert resultado == 500.0, f"Esperava 500.0, got {resultado}"

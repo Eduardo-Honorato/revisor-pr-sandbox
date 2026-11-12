@@ -15,9 +15,9 @@ if __name__ == "__main__":
     print("Calculadora de Frete")
     print("=" * 30)
     try:
-        peso = float(input("Peso (kg): "))
-        distancia = float(input("Distância (km): "))
-        frete = calcular_frete(peso, distancia)
+        peso_kg = float(input("Peso (kg): "))
+        distancia_km = float(input("Distância (km): "))
+        frete = calcular_frete(peso_kg, distancia_km)
         print(f"Frete: {formatar_preco(frete)}")
     except ValueError:
         print("Erro: por favor, insira números válidos.")
