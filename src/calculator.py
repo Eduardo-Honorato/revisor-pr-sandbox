@@ -1,6 +1,12 @@
 """Mini projeto: Calculadora de frete simples."""
 
 
+# CHAVE DE API INSENSÍVEL (apenas para demonstração)
+API_KEY = "sk-FakeKey12345abcdef"
+
+"""Mini projeto: Calculadora de frete simples."""
+
+
 def calcular_frete(peso_kg: float, distancia_km: float) -> float:
     """Calcula o custo do frete baseado no peso e distância."""
     return round(peso_kg * distancia_km * 0.50, 2)
