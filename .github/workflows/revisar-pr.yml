@@ -1,0 +1,51 @@
+name: Revisao automatica de PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+# Se o autor enviar outro commit durante a revisao, cancela a anterior.
+concurrency:
+  group: revisao-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+      LLM_MODEL: ${{ vars.LLM_MODEL }}
+      LLM_MAX_TOKENS: ${{ vars.LLM_MAX_TOKENS }}
+    steps:
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Instalar o revisor
+        env:
+          REVISOR_REPO_TOKEN: ${{ secrets.REVISOR_REPO_TOKEN }}
+        run: |
+          git config --global url."https://x-access-token:${REVISOR_REPO_TOKEN}@github.com/".insteadOf "https://github.com/"
+          uv tool install git+https://github.com/Eduardo-Honorato/revisor-pr.git
+          echo "$(uv tool dir --bin)" >> "$GITHUB_PATH"
+
+      - name: Obter o diff do PR
+        run: gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }} > pr.diff
+
+      - name: Revisar
+        run: revisar --diff pr.diff --markdown > comentario.md
+
+      - name: Comentar no PR
+        run: |
+          if [ -s comentario.md ]; then
+            gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} \
+              --body-file comentario.md --edit-last --create-if-none
+          else
+            echo "Nada para comentar (diff vazio)."
+          fi
