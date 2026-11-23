@@ -25,6 +25,8 @@ jobs:
       LLM_MAX_TOKENS: ${{ vars.LLM_MAX_TOKENS }}
       LLM_FALLBACK_MODELS: ${{ vars.LLM_FALLBACK_MODELS }}
       LLM_MAX_DIFF_CHARS: ${{ vars.LLM_MAX_DIFF_CHARS }}
+      LLM_TEMPERATURE: ${{ vars.LLM_TEMPERATURE }}
+      COMENTAR_POR_LINHA: ${{ vars.COMENTAR_POR_LINHA }}
     steps:
       - name: Instalar uv
         uses: astral-sh/setup-uv@v6
@@ -41,7 +43,12 @@ jobs:
         run: gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }} > pr.diff
 
       - name: Revisar
-        run: revisar --diff pr.diff --markdown > comentario.md
+        run: |
+          if [ "$COMENTAR_POR_LINHA" = "true" ]; then
+            revisar --diff pr.diff --markdown --comentar-em "${{ github.repository }}" --pr "${{ github.event.pull_request.number }}" > comentario.md
+          else
+            revisar --diff pr.diff --markdown > comentario.md
+          fi
 
       - name: Comentar no PR
         run: |
